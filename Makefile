@@ -9,8 +9,8 @@ else
 	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU
 endif
 
-all : main.o vec2.o map.o raycaster.o time.o
-	${CC} main.o map.o vec2.o raycaster.o time.o $(LDFLAGS) -o test
+all : main.o vec2.o map.o raycaster.o time.o demo_state.o
+	${CC} main.o map.o vec2.o raycaster.o time.o demo_state.o $(LDFLAGS) -o test
 
 vec2.o : vec2.c vec2.h
 	${CC} ${CFLAGS} -c vec2.c
@@ -26,6 +26,9 @@ raycaster.o : raycaster.c raycaster.h
 
 time.o : time.h time.c
 	${CC} ${CFLAGS} -c time.c
+
+demo_state.o : demo_state.h demo_state.c
+	${CC} ${CFLAGS} -c demo_state.c
 
 clean :
 	rm ./*.o

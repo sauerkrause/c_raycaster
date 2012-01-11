@@ -1,5 +1,6 @@
 #ifndef DEMO_STATE_H
 #define DEMO_STATE_H
+#include "vec2.h"
 
 typedef struct demo_state {
   vec2_t pos;
