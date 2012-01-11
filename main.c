@@ -5,6 +5,7 @@
 #include "game.h"
 #include "raycaster.h"
 #include "time.h"
+#include "demo_state.h"
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
@@ -34,13 +35,6 @@ void transform_map(map_t* map);
 void initialize_camera(void);
 
 static timespan span;
-
-typedef struct demo_state {
-  vec2_t pos;
-  vec2_t offset;
-} demo_state;
-
-static demo_state demo_vars;
 
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov)
 {
@@ -79,19 +73,20 @@ void compute_cam_dists(const vec2_t* hits, const size_t num_hits,
 
 void update_scene(void)
 {
-  vec2_rotate(&demo_vars.offset, RATE_OF_CHANGE * 0.15 * time_elapsed(&span));
-  state.cam_pos = vec2_add(&demo_vars.pos, &demo_vars.offset);
+  vec2_rotate(& demo_state_get()->offset, 
+	      RATE_OF_CHANGE * 0.15 * time_elapsed(&span));
+  state.cam_pos = vec2_add(& demo_state_get()->pos, 
+			   & demo_state_get()->offset);
   time_update(&span);
   vec2_rotate(&state.cam_dir, RATE_OF_CHANGE * time_elapsed(&span));
-  /* printf("Cam dir: (%f,%f)\n", state.cam_dir.x, state.cam_dir.y); */
 }
 
 void initialize_camera(void)
 {
-  demo_vars.pos.x = 39.5;
-  demo_vars.pos.y = 11.5;
-  demo_vars.offset.x = 10;
-  demo_vars.offset.y = 0.0;
+  demo_state_get()->pos.x = 39.5;
+  demo_state_get()->pos.y = 11.5;
+  demo_state_get()->offset.x = 10;
+  demo_state_get()->offset.y = 0.0;
   span.current = 0.0;
   time_update(&span);
   time_update(&span);
