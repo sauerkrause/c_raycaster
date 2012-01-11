@@ -12,23 +12,23 @@ endif
 all : main.o vec2.o map.o raycaster.o time.o demo_state.o
 	${CC} main.o map.o vec2.o raycaster.o time.o demo_state.o $(LDFLAGS) -o test
 
-vec2.o : vec2.c vec2.h
-	${CC} ${CFLAGS} -c vec2.c
+vec2.o : src/vec2.c src/vec2.h
+	${CC} ${CFLAGS} -c src/vec2.c
 
-main.o : main.c
-	${CC} ${CFLAGS} -c main.c
+main.o : src/main.c
+	${CC} ${CFLAGS} -c src/main.c
 
-map.o : map.c map.h
-	${CC} ${CFLAGS} -c map.c
+map.o : src/map.c src/map.h
+	${CC} ${CFLAGS} -c src/map.c
 
-raycaster.o : raycaster.c raycaster.h
-	${CC} ${CFLAGS} -c raycaster.c
+raycaster.o : src/raycaster.c src/raycaster.h
+	${CC} ${CFLAGS} -c src/raycaster.c
 
-time.o : time.h time.c
-	${CC} ${CFLAGS} -c time.c
+time.o : src/time.h src/time.c
+	${CC} ${CFLAGS} -c src/time.c
 
-demo_state.o : demo_state.h demo_state.c
-	${CC} ${CFLAGS} -c demo_state.c
+demo_state.o : src/demo_state.h src/demo_state.c
+	${CC} ${CFLAGS} -c src/demo_state.c
 
 clean :
 	rm ./*.o
