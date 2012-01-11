@@ -4,8 +4,8 @@
 #include "map.h"
 #include "game.h"
 #include "raycaster.h"
+#include "time.h"
 #include <stdint.h>
-#include <sys/time.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -15,12 +15,13 @@
 #define XRES 2560
 #define YRES 1600
 
-#define FOV 75.0
+#define VFOV 90.0
 #define RATE_OF_CHANGE 1.0
 #define POS_X 3.5
 #define POS_Y 5.5
 
 /* callback to render the scene */
+vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
 void render_scene(void);
 void raycast_scene(vec2_t* hits, const size_t num_hits);
 void update_scene(void);
@@ -32,32 +33,27 @@ void initialize_map(void);
 void transform_map(map_t* map);
 void initialize_camera(void);
 
-vec2_t pos;
-vec2_t offset;
+static timespan span;
 
-typedef struct timespan {
-  double last;
-  double current;
-} timespan;
+typedef struct demo_state {
+  vec2_t pos;
+  vec2_t offset;
+} demo_state;
 
-timespan span;
+static demo_state demo_vars;
 
-void time_update()
+vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov)
 {
-  struct timeval tim;
-  gettimeofday(&tim, 0);
-  span.last = span.current;
-  span.current = (double)tim.tv_sec + (double)tim.tv_usec / 1000000.0;
+  vec2_type out;
+  vec2_type fd;
+  fd = yres * 0.5 / tan(vfov * 0.5);
+  out = atan2(xres * 0.5, fd);
+  return out;
 }
-
-double time_elapsed()
-{
-  return span.current - span.last;
-}
-
 void raycast_scene(vec2_t* hits, const size_t num_hits)
 {
-  vec2_type theta = FOV / 360.0 * 2.0 * 3.14159;
+  vec2_type theta;
+  theta = calculate_fov(XRES, YRES, VFOV);
   raycaster_cast_rays(&state.cam_pos, &state.cam_dir, &theta, 
 		      hits, num_hits);
 }
@@ -83,22 +79,22 @@ void compute_cam_dists(const vec2_t* hits, const size_t num_hits,
 
 void update_scene(void)
 {
-  vec2_rotate(&offset, RATE_OF_CHANGE * 0.15 * time_elapsed());
-  state.cam_pos = vec2_add(&pos, &offset);
-  time_update();
-  vec2_rotate(&state.cam_dir, RATE_OF_CHANGE * time_elapsed());
+  vec2_rotate(&demo_vars.offset, RATE_OF_CHANGE * 0.15 * time_elapsed(&span));
+  state.cam_pos = vec2_add(&demo_vars.pos, &demo_vars.offset);
+  time_update(&span);
+  vec2_rotate(&state.cam_dir, RATE_OF_CHANGE * time_elapsed(&span));
   /* printf("Cam dir: (%f,%f)\n", state.cam_dir.x, state.cam_dir.y); */
 }
 
 void initialize_camera(void)
 {
-  pos.x = 39.5;
-  pos.y = 11.5;
-  offset.x = 10;
-  offset.y = 0.0;
+  demo_vars.pos.x = 39.5;
+  demo_vars.pos.y = 11.5;
+  demo_vars.offset.x = 10;
+  demo_vars.offset.y = 0.0;
   span.current = 0.0;
-  time_update();
-  time_update();
+  time_update(&span);
+  time_update(&span);
   state.cam_pos.x = 3.5;
   state.cam_pos.y = 3.5;
   state.cam_dir.x = -1.0;
@@ -130,7 +126,7 @@ void render_scene(void) {
 
   update_scene();
 
-  fps = 1.0 / time_elapsed();
+  fps = 1.0 / time_elapsed(&span);
 
   printf("FPS: %g\n", fps);
 
