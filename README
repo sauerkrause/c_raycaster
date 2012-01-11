@@ -1,0 +1,9 @@
+Requirements:
+	gl
+	glu
+	glut of some form
+	linux or OS X. wouldn't go so far as to say *nix
+   	clang or gcc (or any other compiler that accepts the same compiler flags as in my Makefile)
+
+To build:
+   edit compiler in Makefile
