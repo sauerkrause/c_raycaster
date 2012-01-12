@@ -6,20 +6,24 @@
 #include "raycaster.h"
 #include "time.h"
 #include "demo_state.h"
+#include "framebuffer.h"
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
+#include <ncurses.h>
 
 #define PROFILING 1
 
 #define FULLSCREEN 1
-#define XRES 2560
-#define YRES 1600
 
 #define VFOV 90.0
 #define RATE_OF_CHANGE 1.0
 #define POS_X 3.5
 #define POS_Y 5.5
+
+#define MAKE_RGBA(r,g,b,a) \
+  (a & 0xf) << 0 | (b & 0xf) << 4 | (g & 0xf) << 8 | (r & 0xf) << 12
+
 
 /* callback to render the scene */
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
@@ -47,7 +51,10 @@ vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov)
 void raycast_scene(vec2_t* hits, const size_t num_hits)
 {
   vec2_type theta;
-  theta = calculate_fov(XRES, YRES, VFOV);
+  int width, height;
+  
+  framebuffer_get_info(&width, &height, 0,0);
+  theta = calculate_fov(width, height, VFOV);
   raycaster_cast_rays(&state.cam_pos, &state.cam_dir, &theta, 
 		      hits, num_hits);
 }
@@ -116,51 +123,61 @@ void transform_map(map_t* map)
 void render_scene(void) {
   vec2_t* intersections;
   vec2_type* dists;
-  size_t quad_it;
   double fps;
+  GLushort * fb;
+  GLsizei width, height;
+  unsigned short x;
+  char string[128];
 
   update_scene();
-
   fps = 1.0 / time_elapsed(&span);
+  sprintf(string, "FPS: %5.1f", fps);
 
-  printf("FPS: %g\n", fps);
+  framebuffer_get_info(&width, &height, 0,0);
 
-  quad_it = 0;
-  intersections = malloc(sizeof(vec2_t) * (XRES + 1));
-  dists = malloc(sizeof(vec2_type) * XRES);
-  raycast_scene(intersections, XRES);
-  compute_cam_dists(intersections, XRES, dists);
+  intersections = malloc(sizeof(vec2_t) * (width + 1));
+  dists = malloc(sizeof(vec2_type) * width);
+  raycast_scene(intersections, width);
+  compute_cam_dists(intersections, width, dists);
   free(intersections);
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glBegin(GL_QUADS);
-
-  glColor3f(0.0,0.0,1.0);
-  glVertex2f(-1.0, 1.0);
-  glVertex2f(1.0, 1.0);
-  glVertex2f(1.0, 0.0);
-  glVertex2f(-1.0, 0.0);
-
-  glColor3f(0.0,1.0,0.0);
-  glVertex2f(-1.0, 0.0);
-  glVertex2f(1.0, 0.0);
-  glVertex2f(1.0, -1.0);
-  glVertex2f(-1.0, -1.0);
-
-  glColor3f(0.5,0.5,0.5);
-  for(quad_it = 0; quad_it < XRES; ++quad_it) {
-    const float width = 2.0 / (float)XRES;
-    float height;
-    
-    height = 1.0 / dists[quad_it];
-
-    glVertex2f(-1.0+width*quad_it, height);
-    glVertex2f(-1.0+width*quad_it, -height);
-    glVertex2f(-1.0+width*(quad_it+1), -height);
-    glVertex2f(-1.0+width*(quad_it+1), height);
+  fb = framebuffer_get();
+  for(x = 0; x < width; ++x) {
+    const int midpt = height / 2;
+    int y;
+    int bottom_y;
+    int top_y;
+    vec2_type scaled_col_height;
+    scaled_col_height = 1.0/dists[x];
+    bottom_y = midpt - (int)(scaled_col_height * midpt);
+    top_y = midpt + (int)(scaled_col_height * midpt);
+    attron(COLOR_PAIR(1));
+    for(y = 0; y < bottom_y; ++y) {
+      const GLushort pix_color = MAKE_RGBA(0,0xf,0,0xf);
+      fb[x*height + y] = pix_color;
+      mvaddch(y,x,' ');
+    }
+    attroff(COLOR_PAIR(1));
+    attron(COLOR_PAIR(2));
+    for(y = (bottom_y < 0) ? 0 : bottom_y; y < top_y && y < height; ++y) {
+      GLushort pix_color;
+      pix_color = MAKE_RGBA(7,7,7,0xf);
+      fb[x*height + y] = pix_color;
+      mvaddch(y,x,'|');
+    }
+    attroff(COLOR_PAIR(2));
+    attron(COLOR_PAIR(3));
+    for(y = top_y; y < height; ++y) {
+      const GLushort pix_color = MAKE_RGBA(0,0,0xf,0xf);
+      fb[x*height+y] = pix_color;
+      mvaddch(y,x,'-');
+    }
+    attroff(COLOR_PAIR(3));
   }
-  glEnd();
-  glutSwapBuffers();
+  addstr(string);
+  framebuffer_dump();
+  refresh();
+  /* glutSwapBuffers(); */
   free(dists);
   
 }
@@ -176,24 +193,38 @@ void handle_normal_keys(unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-  glutInitWindowPosition(100,100);
-  glutInitWindowSize(XRES, YRES);
-  glutCreateWindow("Raycaster Rev C");
-  if(FULLSCREEN)
-    glutFullScreen();
+  int row, col;
+  /* glutInit(&argc, argv); */
+  /* glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA); */
+  /* glutInitWindowPosition(100,100); */
+  /* glutInitWindowSize(XRES, YRES); */
+  /* glutCreateWindow("Raycaster Rev C"); */
+  /* if(FULLSCREEN) */
+  /*   glutFullScreen(); */
 
-  /* register callbacks */
-  glutDisplayFunc(&render_scene);
-  glutIdleFunc(&render_scene);
-  glutKeyboardFunc(&handle_normal_keys);
+  /* /\* register callbacks *\/ */
+  /* glutDisplayFunc(&render_scene); */
+  /* glutIdleFunc(&render_scene); */
+  /* glutKeyboardFunc(&handle_normal_keys); */
   
+  initscr();
+  getmaxyx(stdscr, col, row);
+
+  start_color();
+  init_pair(1, COLOR_BLACK, COLOR_BLUE);
+  init_pair(2, COLOR_WHITE, COLOR_WHITE);
+  init_pair(3, COLOR_GREEN, COLOR_GREEN);
+
   initialize_camera();
   initialize_map();
+  framebuffer_init(row, col-1, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4);
   map_print(map_get());
 
-  /* Enter GLUT event processing cycle */
-  glutMainLoop();
+  for(;;){
+    render_scene();
+  }
+  /* /\* Enter GLUT event processing cycle *\/ */
+  /* glutMainLoop(); */
+  endwin();
   return 1;
 }
