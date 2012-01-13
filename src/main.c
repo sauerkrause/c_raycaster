@@ -21,7 +21,8 @@
 
 #define MAKE_RGBA(r,g,b,a) \
   (a & 0xf) << 0 | (b & 0xf) << 4 | (g & 0xf) << 8 | (r & 0xf) << 12
-
+#define INDEX_XY(x,y) \
+  (x * height + y)
 
 /* callback to render the scene */
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
@@ -122,7 +123,7 @@ void render_scene(void) {
   vec2_t* intersections;
   vec2_type* dists;
   double fps;
-  GLushort * fb;
+  /* GLushort * fb; */
   GLsizei width, height;
   unsigned short x;
   char string[128];
@@ -139,7 +140,7 @@ void render_scene(void) {
   compute_cam_dists(intersections, width, dists);
   free(intersections);
 
-  fb = framebuffer_get();
+  /* fb = framebuffer_get(); */
 
   for(x = 0; x < width; ++x) {
     const int midpt = height / 2;
@@ -152,23 +153,23 @@ void render_scene(void) {
     top_y = midpt + (int)(scaled_col_height * midpt);
     attron(COLOR_PAIR(1));
     for(y = 0; y < bottom_y; ++y) {
-      const GLushort pix_color = MAKE_RGBA(0,0xf,0,0xf);
-      fb[x*height + y] = pix_color;
+      /* const GLushort pix_color = MAKE_RGBA(0,0xf,0,0xf); */
+      /* fb[INDEX_XY(x,y)] = pix_color; */
       mvaddch(y,x,' ');
     }
     attroff(COLOR_PAIR(1));
     attron(COLOR_PAIR(2));
     for(y = (bottom_y < 0) ? 0 : bottom_y; y < top_y && y < height; ++y) {
-      GLushort pix_color;
-      pix_color = MAKE_RGBA(7,7,7,0xf);
-      fb[x*height + y] = pix_color;
+      /* GLushort pix_color; */
+      /* pix_color = MAKE_RGBA(7,7,7,0xf); */
+      /* fb[INDEX_XY(x,y)] = pix_color; */
       mvaddch(y,x,'|');
     }
     attroff(COLOR_PAIR(2));
     attron(COLOR_PAIR(3));
     for(y = top_y; y < height; ++y) {
-      const GLushort pix_color = MAKE_RGBA(0,0,0xf,0xf);
-      fb[x*height+y] = pix_color;
+      /* const GLushort pix_color = MAKE_RGBA(0,0,0xf,0xf); */
+      /* fb[INDEX_XY(x,y)] = pix_color; */
       mvaddch(y,x,'-');
     }
     attroff(COLOR_PAIR(3));

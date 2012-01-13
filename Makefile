@@ -1,6 +1,6 @@
 #default cmdline flags
 CC=gcc
-CFLAGS=-ansi -Wall -pedantic -O2
+CFLAGS=-ansi -Wall -pedantic -O0 -g
 COMMON_LDFLAGS = -lm -lncurses
 
 ifeq "$(OSTYPE)" "darwin11"
@@ -9,9 +9,9 @@ else
 	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU
 endif
 
-all : main.o vec2.o map.o raycaster.o time.o demo_state.o framebuffer.o
+all : main.o vec2.o map.o raycaster.o time.o demo_state.o framebuffer.o enemy_director.o
 	${CC} main.o map.o vec2.o raycaster.o time.o demo_state.o \
-framebuffer.o $(LDFLAGS) -o test
+framebuffer.o enemy_director.o $(LDFLAGS) -o test
 
 vec2.o : src/vec2.c src/vec2.h
 	${CC} ${CFLAGS} -c src/vec2.c
@@ -33,6 +33,9 @@ demo_state.o : src/demo_state.h src/demo_state.c
 
 framebuffer.o : src/framebuffer.h src/framebuffer.c
 	${CC} ${CFLAGS} -c src/framebuffer.c
+
+enemy_director.o : src/enemy_director.h src/enemy_director.c
+	${CC} ${CFLAGS} -c src/enemy_director.c
 
 clean :
 	rm ./*.o
