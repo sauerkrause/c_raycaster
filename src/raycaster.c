@@ -38,26 +38,24 @@ static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam)
 
 
 void raycaster_cast_rays(const vec2_t* origin,
-		    const vec2_t* ray,
-		    const vec2_type* fov,
-		    vec2_t* intersections,
-		    size_t count)
+			 const vec2_t* ray,
+			 const vec2_type* fov,
+			 vec2_t* intersections,
+			 size_t count)
 {
   vec2_type lower_bound, upper_bound, d_theta;
-  size_t current_ind;
   vec2_t bad_ray;
   int upper_ind, counter;
 
   upper_bound = *fov * 0.5;
   lower_bound = -upper_bound;
   d_theta = *fov / (vec2_type)count;
-
+  
   bad_ray.x = -1.0;
   bad_ray.y = -1.0;
-
-  current_ind = 0;
+  
   upper_ind = (int)((upper_bound - lower_bound) / d_theta);
-
+  
   for (counter = 0; counter < upper_ind; ++counter) {
     vec2_t current_ray;
     vec2_type theta;
@@ -65,7 +63,7 @@ void raycaster_cast_rays(const vec2_t* origin,
     memcpy(&current_ray, ray, sizeof(vec2_t));
     vec2_rotate(&current_ray, theta);
     if(!raycaster_cast(origin, &current_ray, intersections + counter))
-      *((intersections) + (current_ind - 1)) = bad_ray;
+      *((intersections) + (counter - 1)) = bad_ray;
   }
 }
 

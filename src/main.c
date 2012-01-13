@@ -178,7 +178,6 @@ void render_scene(void) {
   addstr(string);
   framebuffer_dump();
   refresh();
-  /* glutSwapBuffers(); */
   free(dists);
   
 }
@@ -195,19 +194,7 @@ void handle_normal_keys(unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {
   int row, col;
-  /* glutInit(&argc, argv); */
-  /* glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA); */
-  /* glutInitWindowPosition(100,100); */
-  /* glutInitWindowSize(XRES, YRES); */
-  /* glutCreateWindow("Raycaster Rev C"); */
-  /* if(FULLSCREEN) */
-  /*   glutFullScreen(); */
 
-  /* /\* register callbacks *\/ */
-  /* glutDisplayFunc(&render_scene); */
-  /* glutIdleFunc(&render_scene); */
-  /* glutKeyboardFunc(&handle_normal_keys); */
-  
   initscr();
   getmaxyx(stdscr, col, row);
 
@@ -223,8 +210,6 @@ int main(int argc, char** argv)
   for(;;){
     render_scene();
   }
-  /* Enter GLUT event processing cycle */
-  glutMainLoop();
   endwin();
 
   return 1;
