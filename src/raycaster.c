@@ -43,29 +43,30 @@ void raycaster_cast_rays(const vec2_t* origin,
 		    vec2_t* intersections,
 		    size_t count)
 {
-  vec2_type lower_bound, upper_bound, d_theta, theta;
+  vec2_type lower_bound, upper_bound, d_theta;
   size_t current_ind;
-  vec2_t* current_ray;
   vec2_t bad_ray;
+  int upper_ind, counter;
 
   upper_bound = *fov * 0.5;
   lower_bound = -upper_bound;
   d_theta = *fov / (vec2_type)count;
 
-  theta = lower_bound;
   bad_ray.x = -1.0;
   bad_ray.y = -1.0;
 
   current_ind = 0;
-  current_ray = malloc(sizeof(vec2_t));
-  while(theta < upper_bound) {
-    memcpy(current_ray, ray, sizeof(vec2_t));
-    vec2_rotate(current_ray, theta);
-    if(!raycaster_cast(origin, current_ray, intersections + current_ind++))
+  upper_ind = (int)((upper_bound - lower_bound) / d_theta);
+
+  for (counter = 0; counter < upper_ind; ++counter) {
+    vec2_t current_ray;
+    vec2_type theta;
+    theta = counter * d_theta + lower_bound;
+    memcpy(&current_ray, ray, sizeof(vec2_t));
+    vec2_rotate(&current_ray, theta);
+    if(!raycaster_cast(origin, &current_ray, intersections + counter))
       *((intersections) + (current_ind - 1)) = bad_ray;
-    theta += d_theta;
   }
-  free(current_ray);
 }
 
 int raycaster_cast(const vec2_t* origin, const vec2_t* ray,
@@ -153,7 +154,7 @@ static int raycaster_cast_xplanes(const vec2_t* origin,
     negative = 1;
   else
     negative = 0;
-  /*  printf("Ray X Planes: (%f,%f)\n", ray->x, ray->y); */
+
   x_off = ((int)origin->x + !negative) - origin->x;
   if(negative)
     x_off -= 0.0001f;
@@ -171,7 +172,6 @@ static int raycaster_cast_xplanes(const vec2_t* origin,
     if(map_is_block(map_get(), (int)pt.x, (int)pt.y)) {
       *intersection = pt;
       intersected = 1;
-      /*printf("Hit x-plane at pt: (%f, %f)\n", pt.x, pt.y);*/
     }
     /* Continue the loop with the next intersection */
     pt = vec2_add(&offset, &pt);

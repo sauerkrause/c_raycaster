@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <ncurses.h>
 
-#define PROFILING 1
-
 #define FULLSCREEN 1
 
 #define VFOV 90.0
@@ -142,6 +140,7 @@ void render_scene(void) {
   free(intersections);
 
   fb = framebuffer_get();
+
   for(x = 0; x < width; ++x) {
     const int midpt = height / 2;
     int y;
@@ -174,6 +173,7 @@ void render_scene(void) {
     }
     attroff(COLOR_PAIR(3));
   }
+
   addstr(string);
   framebuffer_dump();
   refresh();
@@ -219,12 +219,12 @@ int main(int argc, char** argv)
   initialize_map();
   framebuffer_init(row, col-1, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4);
   map_print(map_get());
-
   for(;;){
     render_scene();
   }
-  /* /\* Enter GLUT event processing cycle *\/ */
-  /* glutMainLoop(); */
+  /* Enter GLUT event processing cycle */
+  glutMainLoop();
   endwin();
+
   return 1;
 }
