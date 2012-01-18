@@ -4,28 +4,13 @@
 #include <memory.h>
 #include <assert.h>
 
-/* typedef struct enemy_t { */
-/*   vec2_t position; */
-/*   float width; */
-/* } enemy_t; */
-
-/* typedef struct long_free_list_t */
-/* { */
-/*   long data; */
-/*   long_free_list_t* next; */
-/* } long_free_list_t; */
-
-/* typedef struct enemy_director_t { */
-/*   enemy_t* enemies; */
-/*   long_free_list_t* first_free; */
-/* } enemy_director_t; */
-
 static void enemy_director_grow(enemy_director_t* dir);
 static void delete_enemy(enemy_director_t* dir, enemy_t* enemy);
 
 void enemy_director_init(enemy_director_t* dir)
 {
   dir->enemies = malloc(1 * sizeof(enemy_t));
+  dir->enemies[0].valid = 0;
   dir->first_free = malloc(1 * sizeof(long_free_list_t));
   assert(dir->first_free);
   dir->first_free->next = 0;
@@ -43,6 +28,7 @@ void enemy_director_add(enemy_director_t* dir,  enemy_t* enemy)
   old_free = dir->first_free;
   dir->first_free = old_free->next;
   enemy->id = old_free->data;
+  enemy->valid = 1;
   memcpy(dir->enemies + old_free->data, enemy, sizeof(enemy_t));
   free(old_free);
 }
@@ -55,6 +41,7 @@ void enemy_director_del(enemy_director_t* dir, long id)
 void delete_enemy(enemy_director_t* dir, enemy_t* enemy)
 {
   long_free_list_t* new_free;
+  enemy->valid = 0;
   new_free = malloc(sizeof(long_free_list_t));
   new_free->next = dir->first_free;
   new_free->data = enemy->id;
@@ -79,6 +66,7 @@ static void enemy_director_grow(enemy_director_t* dir)
 
   for(i = i * 2 - 1; i >= dir->size; --i) {
     long_free_list_t* first_free = malloc(sizeof(long_free_list_t));
+    dir->enemies[i].valid = 0;
     first_free->data = i;
     first_free->next = dir->first_free;
     dir->first_free = first_free;

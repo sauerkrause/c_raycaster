@@ -7,6 +7,7 @@ typedef struct enemy_t {
   vec2_t position;
   float width;
   long id;
+  unsigned char valid;
 } enemy_t;
 
 typedef struct long_free_list_t
