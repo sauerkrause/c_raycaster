@@ -24,7 +24,6 @@
 #define INDEX_XY(x,y) \
   (x * height + y)
 
-/* callback to render the scene */
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
 void render_scene(void);
 void raycast_scene(vec2_t* hits, const size_t num_hits);
@@ -104,7 +103,16 @@ void initialize_camera(void)
 
 void initialize_map(void)
 {
-  transform_map(map_get());
+  FILE * out; 
+  out = fopen("output.kmap", "r");
+  if(!out) {
+    transform_map(map_get());
+    out = fopen("output.kmap", "w");
+    map_serialize(map_get(), out, 1);
+  } else {
+    map_serialize(map_get(), out, 0);
+  }
+  fclose(out);
 }
 
 void transform_map(map_t* map)
@@ -140,8 +148,6 @@ void render_scene(void) {
   compute_cam_dists(intersections, width, dists);
   free(intersections);
 
-  /* fb = framebuffer_get(); */
-
   for(x = 0; x < width; ++x) {
     const int midpt = height / 2;
     int y;
@@ -176,8 +182,8 @@ void render_scene(void) {
   }
 
   addstr(string);
-  framebuffer_dump();
   refresh();
+  framebuffer_dump();
   free(dists);
   
 }
@@ -194,6 +200,8 @@ void handle_normal_keys(unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {
   int row, col;
+  row=80;
+  col=24;
 
   initscr();
   getmaxyx(stdscr, col, row);
@@ -206,7 +214,7 @@ int main(int argc, char** argv)
   initialize_camera();
   initialize_map();
   framebuffer_init(row, col-1, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4);
-  map_print(map_get());
+  /* map_print(map_get()); */
   for(;;){
     render_scene();
   }

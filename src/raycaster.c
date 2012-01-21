@@ -1,4 +1,5 @@
 #include "raycaster.h"
+#include "threading.h"
 #include "map.h"
 #include "game.h"
 #include <memory.h>
@@ -15,6 +16,18 @@ static int raycaster_cast_yplanes(const vec2_t* origin,
 				   const vec2_t* ray,
 				   vec2_t* intersection);
 static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam);
+
+typedef struct rct_info
+{
+  const vec2_t* origin;
+  const vec2_t* ray;
+  const vec2_type* fov;
+  size_t count;
+  vec2_t* intersections;
+  int id;
+} rct_info;
+
+void* raycaster_ray_cast_thread(void* params);
 
 
 static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam)
@@ -66,6 +79,36 @@ void raycaster_cast_rays(const vec2_t* origin,
       *((intersections) + (counter - 1)) = bad_ray;
   }
 }
+
+void* raycaster_ray_cast_thread(void* params)
+{
+  rct_info* rc_params = (rct_info*)params;
+  vec2_t bad_ray;
+  vec2_type lower_bound, upper_bound, d_theta;
+  int upper_ind, counter;
+
+  upper_bound = *rc_params->fov;
+  lower_bound = -upper_bound;
+  d_theta = *rc_params->fov / (vec2_type)rc_params->count;
+  
+  bad_ray.x = -1.0;
+  bad_ray.y = -1.0;
+
+  upper_ind = (int)((upper_bound - lower_bound) / d_theta);
+  
+  counter = 0;
+  for(counter = upper_ind / threading_num_procs() * rc_params->id; counter < upper_ind; ++counter) {
+    vec2_t current_ray;
+    vec2_type theta;
+    theta = counter * d_theta + lower_bound;
+    memcpy(&current_ray, rc_params->ray, sizeof(vec2_t));
+    vec2_rotate(&current_ray, theta);
+    if(!raycaster_cast(rc_params->origin, &current_ray, rc_params->intersections + counter))
+      *((rc_params->intersections) + (counter - 1)) = bad_ray;
+  }
+  return 0;
+}
+
 
 int raycaster_cast(const vec2_t* origin, const vec2_t* ray,
 		   vec2_t* intersection)
