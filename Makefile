@@ -9,8 +9,8 @@ else
 	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU
 endif
 
-all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o threading.o
-	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o threading.o $(LDFLAGS) -o test
+all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o
+	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o $(LDFLAGS) -o test
 
 vec2.o : src/vec2.c src/vec2.h
 	${CC} ${CFLAGS} ${SOFLAGS} -c src/vec2.c
@@ -35,9 +35,6 @@ framebuffer.o : src/framebuffer.h src/framebuffer.c
 
 enemy_director.o : src/enemy_director.h src/enemy_director.c
 	${CC} ${CFLAGS} ${SOFLAGS} -c src/enemy_director.c
-
-threading.o : src/threading.h src/threading.c
-	${CC} ${CFLAGS} ${SOFLAGS} -c src/threading.c
 
 clean :
 	rm ./*.o
