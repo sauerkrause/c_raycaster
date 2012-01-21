@@ -80,13 +80,7 @@ int raycaster_cast(const vec2_t* origin, const vec2_t* ray,
   intersection_y = malloc(sizeof(vec2_t));
   dist_x = -1.0;
   dist_y = -1.0;
-  /* if(map_is_block(map_get(), (int)origin->x, (int)origin->y)) { */
-  /*   intersection->x = (int)origin->x; */
-  /*   intersection->y = (int)origin->y; */
-  /*   ret_val = 1; */
-  /*   goto raycaster_cleanup_cast_rays; */
-  /* } */
-
+ 
   if(!raycaster_cast_xplanes(origin, ray, intersection_x)) {
     free(intersection_x);
     intersection_x = 0;

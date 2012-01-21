@@ -1,12 +1,13 @@
 #default cmdline flags
-CC=gcc
+CC=clang
 CFLAGS=-ansi -Wall -pedantic -O2
 COMMON_LDFLAGS = -lm -lncurses
+SDL_INCLUDES = -I/Library/Frameworks/SDL.framework/Headers/
 
 ifeq "$(OSTYPE)" "darwin11"
-	LDFLAGS = $(COMMON_LDFLAGS) -framework Cocoa -framework OpenGL -framework GLUT
+	LDFLAGS = $(COMMON_LDFLAGS) -framework Cocoa -framework OpenGL -framework GLUT -framework SDL -lSDLmain
 else
-	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU
+	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU -lSDL
 endif
 
 all : main.o vec2.o map.o raycaster.o time.o demo_state.o framebuffer.o
@@ -17,7 +18,7 @@ vec2.o : src/vec2.c src/vec2.h
 	${CC} ${CFLAGS} -c src/vec2.c
 
 main.o : src/main.c
-	${CC} ${CFLAGS} -c src/main.c
+	${CC} ${SDL_INCLUDES} ${CFLAGS} -c src/main.c
 
 map.o : src/map.c src/map.h
 	${CC} ${CFLAGS} -c src/map.c

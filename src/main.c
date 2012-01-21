@@ -1,5 +1,6 @@
 #include <stdlib.h>
-#include "opengl_dep.h"
+#include "SDL.h"
+#include "SDL_main.h"
 #include "vec2.h"
 #include "map.h"
 #include "game.h"
@@ -24,6 +25,7 @@
 #define MAKE_RGBA(r,g,b,a) \
   (a & 0xf) << 0 | (b & 0xf) << 4 | (g & 0xf) << 8 | (r & 0xf) << 12
 
+static SDL_Surface* framebuffer;
 
 /* callback to render the scene */
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
@@ -52,7 +54,7 @@ void raycast_scene(vec2_t* hits, const size_t num_hits)
 {
   vec2_type theta;
   int width, height;
-  
+
   framebuffer_get_info(&width, &height, 0,0);
   theta = calculate_fov(width, height, VFOV);
   raycaster_cast_rays(&state.cam_pos, &state.cam_dir, &theta, 
@@ -128,12 +130,17 @@ void render_scene(void) {
   GLsizei width, height;
   unsigned short x;
   char string[128];
+  GLushort* pixel_buffer;
+  pixel_buffer = framebuffer->pixels;
 
   update_scene();
   fps = 1.0 / time_elapsed(&span);
   sprintf(string, "FPS: %5.1f", fps);
 
   framebuffer_get_info(&width, &height, 0,0);
+
+/*   Clear the buffer */
+  memset(pixel_buffer, 0, width * height * sizeof(GLushort));
 
   intersections = malloc(sizeof(vec2_t) * (width + 1));
   dists = malloc(sizeof(vec2_type) * width);
@@ -151,34 +158,31 @@ void render_scene(void) {
     scaled_col_height = 1.0/dists[x];
     bottom_y = midpt - (int)(scaled_col_height * midpt);
     top_y = midpt + (int)(scaled_col_height * midpt);
-    attron(COLOR_PAIR(1));
     for(y = 0; y < bottom_y; ++y) {
-      const GLushort pix_color = MAKE_RGBA(0,0xf,0,0xf);
-      fb[x*height + y] = pix_color;
-      mvaddch(y,x,' ');
+/*       const GLushort pix_color = MAKE_RGBA(0,0xf,0,0xf); */
+/*       fb[x*height + y] = pix_color; */
+      pixel_buffer[y*width + x] = MAKE_RGBA(0,0,0xf,0xf);
+/*       mvaddch(y,x,' '); */
     }
-    attroff(COLOR_PAIR(1));
-    attron(COLOR_PAIR(2));
     for(y = (bottom_y < 0) ? 0 : bottom_y; y < top_y && y < height; ++y) {
-      GLushort pix_color;
-      pix_color = MAKE_RGBA(7,7,7,0xf);
-      fb[x*height + y] = pix_color;
-      mvaddch(y,x,'|');
+/*       GLushort pix_color; */
+/*       pix_color = MAKE_RGBA(7,7,7,0xf); */
+/*       fb[x*height + y] = pix_color; */
+      pixel_buffer[y*width+x] = MAKE_RGBA(0xf,0x8,0x8,0x8);
+/*       mvaddch(y,x,'|'); */
     }
-    attroff(COLOR_PAIR(2));
-    attron(COLOR_PAIR(3));
     for(y = top_y; y < height; ++y) {
-      const GLushort pix_color = MAKE_RGBA(0,0,0xf,0xf);
-      fb[x*height+y] = pix_color;
-      mvaddch(y,x,'-');
+/*       const GLushort pix_color = MAKE_RGBA(0,0,0xf,0xf); */
+/*       fb[x*height+y] = pix_color; */
+      /*      mvaddch(y,x,'-'); */
+      pixel_buffer[y*width+x] = MAKE_RGBA(0x0,0xf,0x0,0x0);
     }
-    attroff(COLOR_PAIR(3));
   }
-  addstr(string);
+  mvaddstr(0,0,string);
   framebuffer_dump();
   refresh();
   free(dists);
-  
+  SDL_UpdateRect(framebuffer, 0,0,0,0);
 }
 
 void handle_normal_keys(unsigned char key, int x, int y)
@@ -190,13 +194,25 @@ void handle_normal_keys(unsigned char key, int x, int y)
   }
 }
 
-int main(int argc, char** argv)
+int SDL_main(int argc, char** argv)
 {
   int row, col;
-
+  int quit;
+  if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
+    fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
+    exit(1);
+  }
+  framebuffer = SDL_SetVideoMode(1280,720,16,SDL_SWSURFACE);
+  if(framebuffer == 0) {
+    fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
+    exit(1);
+  }
+  
+  atexit(SDL_Quit);
   initscr();
   getmaxyx(stdscr, col, row);
-
+  row = framebuffer->w;
+  col = framebuffer->h;
   start_color();
   init_pair(1, COLOR_BLACK, COLOR_BLUE);
   init_pair(2, COLOR_WHITE, COLOR_WHITE);
@@ -206,11 +222,19 @@ int main(int argc, char** argv)
   initialize_map();
   framebuffer_init(row, col-1, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4);
   map_print(map_get());
-
-  for(;;){
+  quit = 0;
+  for(;quit == 0;){
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+      switch(event.type) {
+      case SDL_QUIT:
+	quit = true;
+	break;
+      }
+    }
     render_scene();
   }
 
   endwin();
-  return 1;
+  exit(0);
 }
