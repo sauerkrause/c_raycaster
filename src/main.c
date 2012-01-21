@@ -104,10 +104,10 @@ void initialize_camera(void)
 void initialize_map(void)
 {
   FILE * out; 
-  out = fopen("output.kmap", "r");
+  out = fopen("map.ss", "r");
   if(!out) {
     transform_map(map_get());
-    out = fopen("output.kmap", "w");
+    out = fopen("map.ss", "w");
     map_serialize(map_get(), out, 1);
   } else {
     map_serialize(map_get(), out, 0);
