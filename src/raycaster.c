@@ -16,6 +16,15 @@ static int raycaster_cast_yplanes(const vec2_t* origin,
 				   vec2_t* intersection);
 static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam);
 
+typedef struct rct_info
+{
+  const vec2_t* origin;
+  const vec2_t* ray;
+  const vec2_type* fov;
+  size_t count;
+  vec2_t* intersections;
+  int id;
+} rct_info;
 
 static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam)
 {
@@ -80,7 +89,6 @@ int raycaster_cast(const vec2_t* origin, const vec2_t* ray,
   intersection_y = malloc(sizeof(vec2_t));
   dist_x = -1.0;
   dist_y = -1.0;
- 
   if(!raycaster_cast_xplanes(origin, ray, intersection_x)) {
     free(intersection_x);
     intersection_x = 0;
@@ -146,7 +154,7 @@ static int raycaster_cast_xplanes(const vec2_t* origin,
     negative = 1;
   else
     negative = 0;
-  /*  printf("Ray X Planes: (%f,%f)\n", ray->x, ray->y); */
+
   x_off = ((int)origin->x + !negative) - origin->x;
   if(negative)
     x_off -= 0.0001f;
@@ -157,14 +165,10 @@ static int raycaster_cast_xplanes(const vec2_t* origin,
   
   pt = vec2_add(&starter_offset, origin);
   while(!intersected && pt.x >= 0.0 && pt.x < MAX_X) {
-    /* testing */
-
-
     /* Determine if the position would hit a block */
     if(map_is_block(map_get(), (int)pt.x, (int)pt.y)) {
       *intersection = pt;
       intersected = 1;
-      /*printf("Hit x-plane at pt: (%f, %f)\n", pt.x, pt.y);*/
     }
     /* Continue the loop with the next intersection */
     pt = vec2_add(&offset, &pt);
@@ -199,9 +203,6 @@ static int raycaster_cast_yplanes(const vec2_t* origin,
   
   pt = vec2_add(&starter_offset, origin);
   while(!intersected && pt.y >= 0.0 && pt.y < MAX_Y) {
-    /* testing */
-
-
     /* Determine if the position would hit a block */
     if(map_is_block(map_get(), (int)pt.x, (int)pt.y)) {
       *intersection = pt;

@@ -13,8 +13,6 @@
 #include <stdio.h>
 #include <ncurses.h>
 
-#define PROFILING 1
-
 #define FULLSCREEN 1
 
 #define VFOV 90.0
@@ -24,10 +22,11 @@
 
 #define MAKE_RGBA(r,g,b,a) \
   (a & 0xf) << 0 | (b & 0xf) << 4 | (g & 0xf) << 8 | (r & 0xf) << 12
+#define INDEX_XY(x,y) \
+  (x * height + y)
 
 static SDL_Surface* framebuffer;
 
-/* callback to render the scene */
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
 void render_scene(void);
 void raycast_scene(vec2_t* hits, const size_t num_hits);
@@ -107,7 +106,16 @@ void initialize_camera(void)
 
 void initialize_map(void)
 {
-  transform_map(map_get());
+  FILE * out; 
+  out = fopen("map.ss", "r");
+  if(!out) {
+    transform_map(map_get());
+    out = fopen("map.ss", "w");
+    map_serialize(map_get(), out, 1);
+  } else {
+    map_serialize(map_get(), out, 0);
+  }
+  fclose(out);
 }
 
 void transform_map(map_t* map)
@@ -126,7 +134,7 @@ void render_scene(void) {
   vec2_t* intersections;
   vec2_type* dists;
   double fps;
-  GLushort * fb;
+  /* GLushort * fb; */
   GLsizei width, height;
   unsigned short x;
   char string[128];
@@ -148,7 +156,6 @@ void render_scene(void) {
   compute_cam_dists(intersections, width, dists);
   free(intersections);
 
-  fb = framebuffer_get();
   for(x = 0; x < width; ++x) {
     const int midpt = height / 2;
     int y;
@@ -159,27 +166,18 @@ void render_scene(void) {
     bottom_y = midpt - (int)(scaled_col_height * midpt);
     top_y = midpt + (int)(scaled_col_height * midpt);
     for(y = 0; y < bottom_y; ++y) {
-/*       const GLushort pix_color = MAKE_RGBA(0,0xf,0,0xf); */
-/*       fb[x*height + y] = pix_color; */
       pixel_buffer[y*width + x] = MAKE_RGBA(0,0,0xf,0xf);
-/*       mvaddch(y,x,' '); */
     }
     for(y = (bottom_y < 0) ? 0 : bottom_y; y < top_y && y < height; ++y) {
-/*       GLushort pix_color; */
-/*       pix_color = MAKE_RGBA(7,7,7,0xf); */
-/*       fb[x*height + y] = pix_color; */
       pixel_buffer[y*width+x] = MAKE_RGBA(0xf,0x8,0x8,0x8);
-/*       mvaddch(y,x,'|'); */
     }
     for(y = top_y; y < height; ++y) {
-/*       const GLushort pix_color = MAKE_RGBA(0,0,0xf,0xf); */
-/*       fb[x*height+y] = pix_color; */
-      /*      mvaddch(y,x,'-'); */
       pixel_buffer[y*width+x] = MAKE_RGBA(0x0,0xf,0x0,0x0);
     }
   }
   mvaddstr(0,0,string);
   framebuffer_dump();
+
   refresh();
   free(dists);
   SDL_UpdateRect(framebuffer, 0,0,0,0);
@@ -209,14 +207,13 @@ int SDL_main(int argc, char** argv)
   }
   
   atexit(SDL_Quit);
+  row=80;
+  col=24;
+
   initscr();
   getmaxyx(stdscr, col, row);
   row = framebuffer->w;
   col = framebuffer->h;
-  start_color();
-  init_pair(1, COLOR_BLACK, COLOR_BLUE);
-  init_pair(2, COLOR_WHITE, COLOR_WHITE);
-  init_pair(3, COLOR_GREEN, COLOR_GREEN);
 
   initialize_camera();
   initialize_map();
@@ -234,7 +231,5 @@ int SDL_main(int argc, char** argv)
     }
     render_scene();
   }
-
-  endwin();
   exit(0);
 }
