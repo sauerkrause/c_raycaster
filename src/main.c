@@ -231,5 +231,6 @@ int SDL_main(int argc, char** argv)
     }
     render_scene();
   }
+  endwin();
   exit(0);
 }
