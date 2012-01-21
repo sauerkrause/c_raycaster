@@ -40,7 +40,7 @@ void map_serialize(map_t* map, FILE* file, int mode)
       size = 0;
       while(fgets(line, 1024, file)) {
 	if(!strcmp(line, "(MAP\n")) {
-	  fscanf(file, "  (%d", &size);
+	  fscanf(file, "  (%d '(", &size);
 	  /* printf("%d\n", size); */
 	  break;
 	}
@@ -61,7 +61,7 @@ void map_serialize(map_t* map, FILE* file, int mode)
 	*(*(*map + x) + y) = value;
       }
       while(fgets(line, 1024, file)) {
-	if(!strcmp(line, "))\n")) {
+	if(!strcmp(line, ")))\n")) {
 	  break;
 	}
       }
@@ -73,7 +73,7 @@ void map_serialize(map_t* map, FILE* file, int mode)
 	for(i = 0; i < MAX_X; ++i)
 	  if(*(*(*map + i) + j))
 	    ++size;
-      fprintf(file, "  (%d\n", size);
+      fprintf(file, "  (%d '(\n", size);
       for(j = MAX_Y-1; j >= 0; --j) {
 	for(i = 0; i < MAX_X; ++i) {
 	  if(*(*(*map + i) + j)) {
@@ -81,7 +81,7 @@ void map_serialize(map_t* map, FILE* file, int mode)
 	  } 
 	}
       }
-      fprintf(file, "))\n");
+      fprintf(file, ")))\n");
     }
   }
 }
