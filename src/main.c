@@ -1,6 +1,11 @@
 #include <stdlib.h>
+#ifdef __APPLE__
 #include "SDL.h"
 #include "SDL_main.h"
+#else
+#include "SDL/SDL.h"
+#endif
+
 #include "vec2.h"
 #include "map.h"
 #include "game.h"
@@ -12,6 +17,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <ncurses.h>
+
+#ifdef __APPLE__
+#define MAIN SDL_Main
+#else
+#define MAIN main
+#endif
 
 #define FULLSCREEN 1
 
@@ -192,7 +203,7 @@ void handle_normal_keys(unsigned char key, int x, int y)
   }
 }
 
-int SDL_main(int argc, char** argv)
+int MAIN (int argc, char** argv)
 {
   int row, col;
   int quit;
@@ -200,7 +211,7 @@ int SDL_main(int argc, char** argv)
     fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
     exit(1);
   }
-  framebuffer = SDL_SetVideoMode(1280,720,16,SDL_SWSURFACE);
+  framebuffer = SDL_SetVideoMode(800,600,16,SDL_SWSURFACE);
   if(framebuffer == 0) {
     fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
     exit(1);
@@ -218,7 +229,7 @@ int SDL_main(int argc, char** argv)
   initialize_camera();
   initialize_map();
   framebuffer_init(row, col-1, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4);
-  map_print(map_get());
+  /* map_print(map_get()); */
   quit = 0;
   for(;quit == 0;){
     SDL_Event event;
