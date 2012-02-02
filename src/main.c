@@ -1,10 +1,6 @@
 #include <stdlib.h>
-#ifdef __APPLE__
-#include "SDL.h"
-#include "SDL_main.h"
-#else
-#include "SDL/SDL.h"
-#endif
+
+#include "SDL_dep.h"
 
 #include "vec2.h"
 #include "map.h"
@@ -31,12 +27,8 @@
 #define POS_X 3.5
 #define POS_Y 5.5
 
-#define MAKE_RGBA(r,g,b,a) \
-  (a & 0xf) << 0 | (b & 0xf) << 4 | (g & 0xf) << 8 | (r & 0xf) << 12
 #define INDEX_XY(x,y) \
   (x * height + y)
-
-static SDL_Surface* framebuffer;
 
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
 void render_scene(void);
@@ -65,7 +57,9 @@ void raycast_scene(vec2_t* hits, const size_t num_hits)
   vec2_type theta;
   int width, height;
 
-  framebuffer_get_info(&width, &height, 0,0);
+  width = framebuffer_get()->w;
+  height = framebuffer_get()->h;
+
   theta = calculate_fov(width, height, VFOV);
   raycaster_cast_rays(&state.cam_pos, &state.cam_dir, &theta, 
 		      hits, num_hits);
@@ -141,25 +135,46 @@ void transform_map(map_t* map)
     }
 }
 
+uint32_t make_rgb(float r, float g, float b, SDL_PixelFormat* fmt)
+{
+  uint32_t color, red, green, blue;
+  static const uint32_t white = 0xffffffff;
+  red = (white & fmt->Rmask) >> fmt->Rshift;
+  green = (white & fmt->Gmask) >> fmt->Gshift;
+  blue = (white & fmt->Bmask) >> fmt->Bshift;
+  
+  red *= r;
+  green *= g;
+  blue *= b;
+  
+  color = red << fmt->Rshift;
+  color += green << fmt->Gshift;
+  color += blue << fmt->Bshift;
+  return color;
+}
+
 void render_scene(void) {
   vec2_t* intersections;
   vec2_type* dists;
   double fps;
-  /* GLushort * fb; */
-  GLsizei width, height;
+  int width, height;
   unsigned short x;
   char string[128];
-  GLushort* pixel_buffer;
+  uint32_t* pixel_buffer;
+  SDL_Surface* framebuffer;
+
+  framebuffer = framebuffer_get();
   pixel_buffer = framebuffer->pixels;
 
   update_scene();
   fps = 1.0 / time_elapsed(&span);
   sprintf(string, "FPS: %5.1f", fps);
 
-  framebuffer_get_info(&width, &height, 0,0);
+  width = framebuffer->w;
+  height = framebuffer->h;
 
 /*   Clear the buffer */
-  memset(pixel_buffer, 0, width * height * sizeof(GLushort));
+  framebuffer_wipe();
 
   intersections = malloc(sizeof(vec2_t) * (width + 1));
   dists = malloc(sizeof(vec2_type) * width);
@@ -177,17 +192,16 @@ void render_scene(void) {
     bottom_y = midpt - (int)(scaled_col_height * midpt);
     top_y = midpt + (int)(scaled_col_height * midpt);
     for(y = 0; y < bottom_y; ++y) {
-      pixel_buffer[y*width + x] = MAKE_RGBA(0,0,0xf,0xf);
+      pixel_buffer[y*width + x] = make_rgb(0,0,1.0,framebuffer->format);
     }
     for(y = (bottom_y < 0) ? 0 : bottom_y; y < top_y && y < height; ++y) {
-      pixel_buffer[y*width+x] = MAKE_RGBA(0xf,0x8,0x8,0x8);
+      pixel_buffer[y*width+x] = make_rgb(0.5,0.5,0.5,framebuffer->format);
     }
     for(y = top_y; y < height; ++y) {
-      pixel_buffer[y*width+x] = MAKE_RGBA(0x0,0xf,0x0,0x0);
+      pixel_buffer[y*width+x] = make_rgb(0,1.0,0,framebuffer->format);
     }
   }
   mvaddstr(0,0,string);
-  framebuffer_dump();
 
   refresh();
   free(dists);
@@ -207,15 +221,20 @@ int MAIN (int argc, char** argv)
 {
   int row, col;
   int quit;
+  SDL_Surface * framebuffer;
+
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
     fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
     exit(1);
   }
-  framebuffer = SDL_SetVideoMode(800,600,16,SDL_SWSURFACE);
+  framebuffer = SDL_SetVideoMode(1920,1080,32,SDL_SWSURFACE);
+  
   if(framebuffer == 0) {
     fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
     exit(1);
   }
+
+  framebuffer_set(framebuffer);
   
   atexit(SDL_Quit);
   row=80;
@@ -228,7 +247,7 @@ int MAIN (int argc, char** argv)
 
   initialize_camera();
   initialize_map();
-  framebuffer_init(row, col-1, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4);
+
   /* map_print(map_get()); */
   quit = 0;
   for(;quit == 0;){

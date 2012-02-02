@@ -2,8 +2,8 @@
 #define MAP_H
 #include <stdio.h>
 
-#define MAX_X 1024
-#define MAX_Y 1024
+#define MAX_X 80
+#define MAX_Y 24
 
 typedef int map_t[MAX_X][MAX_Y];
 

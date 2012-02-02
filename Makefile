@@ -1,5 +1,5 @@
 #default cmdline flags
-CC=clang
+CC=gcc
 CFLAGS=-ansi -Wall -pedantic -O2
 
 COMMON_LDFLAGS = -lm -lncurses
