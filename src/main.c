@@ -227,7 +227,7 @@ int MAIN (int argc, char** argv)
     fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
     exit(1);
   }
-  framebuffer = SDL_SetVideoMode(1920,1080,32,SDL_SWSURFACE);
+  framebuffer = SDL_SetVideoMode(640,480,32,SDL_SWSURFACE);
   
   if(framebuffer == 0) {
     fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());

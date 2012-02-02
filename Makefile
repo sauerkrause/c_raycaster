@@ -12,8 +12,8 @@ else
 	SDL_INCLUDES = 
 endif
 
-all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o
-	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o $(LDFLAGS) -o test
+all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o
+	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o $(LDFLAGS) -o test
 
 vec2.o : src/vec2.c src/vec2.h
 	${CC} ${CFLAGS}  -c src/vec2.c
@@ -39,5 +39,7 @@ framebuffer.o : src/framebuffer.h src/framebuffer.c
 enemy_director.o : src/enemy_director.h src/enemy_director.c
 	${CC} ${CFLAGS} -c src/enemy_director.c
 
+xorshift.o : src/xorshift.h src/xorshift.c
+	${CC} ${CFLAGS} -c src/xorshift.c
 clean :
 	rm ./*.o
