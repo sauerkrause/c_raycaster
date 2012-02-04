@@ -1,6 +1,6 @@
 #ifdef __APPLE__
-#include "SDL.h"
-#include "SDL_main.h"
+#include "SDL/SDL.h"
+#include "SDL/SDL_main.h"
 #else
 #include "SDL/SDL.h"
 #endif

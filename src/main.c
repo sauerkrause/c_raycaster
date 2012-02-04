@@ -128,7 +128,7 @@ void transform_map(map_t* map)
   int i, j;
   for(i = 1; i < MAX_X - 1; ++i)
     for(j = 1; j < MAX_Y - 1; ++j) {
-      int data = (float)rand() / RAND_MAX <= 0.15;
+      int data = (float)rand() / RAND_MAX <= 0.05;
       /* int data = i == 2 && j == 4; */
       (*map)[i][j] = data;
       
@@ -191,14 +191,8 @@ void render_scene(void) {
     scaled_col_height = 1.0/dists[x];
     bottom_y = midpt - (int)(scaled_col_height * midpt);
     top_y = midpt + (int)(scaled_col_height * midpt);
-    for(y = 0; y < bottom_y; ++y) {
-      pixel_buffer[y*width + x] = make_rgb(0,0,1.0,framebuffer->format);
-    }
     for(y = (bottom_y < 0) ? 0 : bottom_y; y < top_y && y < height; ++y) {
-      pixel_buffer[y*width+x] = make_rgb(0.5,0.5,0.5,framebuffer->format);
-    }
-    for(y = top_y; y < height; ++y) {
-      pixel_buffer[y*width+x] = make_rgb(0,1.0,0,framebuffer->format);
+      pixel_buffer[y*width+x] = make_rgb(1.0,1.0,1.0,framebuffer->format);
     }
   }
   mvaddstr(0,0,string);
@@ -217,7 +211,7 @@ void handle_normal_keys(unsigned char key, int x, int y)
   }
 }
 
-int MAIN (int argc, char** argv)
+int main(int argc, char** argv)
 {
   int row, col;
   int quit;
