@@ -1,6 +1,6 @@
 #include "texture.h"
 #include "SDL_dep.h"
-#include "SDL_image.h"
+#include "SDL/SDL_image.h"
 #include <string.h>
 
 static void texture_name_add(const char* name, uint8_t id);
