@@ -8,7 +8,7 @@ ifeq "$(OSTYPE)" "darwin11"
 	LDFLAGS = $(COMMON_LDFLAGS) -framework Cocoa -framework OpenGL -framework GLUT -framework SDL -framework SDL_image -lSDLmain
 	SDL_INCLUDES = -I/Library/Frameworks/SDL.framework/Headers/ -I/Library/Frameworks/SDL_image.framework/Headers
 else
-	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU -lSDL
+	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU -lSDL -lSDL_image
 	SDL_INCLUDES = 
 endif
 
