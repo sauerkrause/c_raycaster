@@ -14,13 +14,16 @@ endif
 
 INCLUDES = $(SDL_INCLUDES)
 
-all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o
-	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o $(LDFLAGS) -o test
+all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o
+	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o $(LDFLAGS) -o test
+
+renderer.o : src/renderer.c src/renderer.h src/span.h
+	${CC} ${CFLAGS} ${INCLUDES} -c src/renderer.c
 
 vec2.o : src/vec2.c src/vec2.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/vec2.c
 
-main.o : src/main.c
+main.o : src/main.c src/span.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/main.c
 
 map.o : src/map.c src/map.h
