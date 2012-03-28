@@ -1,14 +1,15 @@
 #include "controller.h"
 #include <stdlib.h>
 #include <memory.h>
+#include <limits.h>
 
 struct controller_s {
-  int state[256];
+  int state[UCHAR_MAX];
 };
 
 controller_t* controller_new()
 {
-  controller_t* new_controller = malloc(sizeof(controller_t));
+  struct controller_s * new_controller = malloc(sizeof(struct controller_s));
   memset(new_controller, 0, sizeof(controller_t));
   return new_controller;
 }

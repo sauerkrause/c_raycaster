@@ -95,24 +95,24 @@ void loop(int* quit)
 	controller_button_went_down(controller, event.key.keysym.sym);
 	break;
       }
+      break;
     case SDL_KEYUP:
       controller_button_came_up(controller, event.key.keysym.sym);
       break;	
     }
   }
-  /* Process game logic */ 
-  if(controller_is_button_down(controller, 'w')) {
+
+  /* Process game logic */
+  if(controller_is_button_down(controller, SDLK_w)) {
     vec2_t velocity;
     velocity = state.cam_dir;
-    vec2_t position = vec2_add(&state.cam_pos, &velocity);
-    state.cam_pos = position;
+    state.cam_pos = vec2_add(&state.cam_pos, &velocity);
   }
-  if(controller_is_button_down(controller, 's')) {
+  if(controller_is_button_down(controller, SDLK_s)) {
     vec2_t velocity;
     velocity = state.cam_dir;
     vec2_scale(&velocity, -1.0);
-    vec2_t position = vec2_add(&state.cam_pos, &velocity);
-    state.cam_pos = position;
+    state.cam_pos = vec2_add(&state.cam_pos, &velocity);
   }
 
   /* Render view */

@@ -10,6 +10,7 @@
 #include "demo_state.h"
 #include "framebuffer.h"
 #include "renderer.h"
+#include <curses.h>
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
