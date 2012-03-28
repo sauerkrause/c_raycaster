@@ -1,12 +1,12 @@
 #default cmdline flags
-CC=gcc
-CFLAGS=-ansi -Wall -pedantic -O2
+CC=clang
+CFLAGS=-ansi -Wall -pedantic -O0 -g
 
 COMMON_LDFLAGS = -lm -lncurses
 
 ifeq "$(OSTYPE)" "darwin11"
 	LDFLAGS = $(COMMON_LDFLAGS) -framework Cocoa -framework OpenGL -framework GLUT -framework SDL -framework SDL_image -lSDLmain
-	SDL_INCLUDES = -I/Library/Frameworks/SDL.framework/Headers/ -I/Library/Frameworks/SDL_image.framework/Headers
+	SDL_INCLUDES = -I/Library/Frameworks/SDL.framework/Headers/ -I/Library/Frameworks/SDL_image.framework/Headers/
 else
 	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU -lSDL -lSDL_image
 	SDL_INCLUDES = 
@@ -14,8 +14,11 @@ endif
 
 INCLUDES = $(SDL_INCLUDES)
 
-all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o
-	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o $(LDFLAGS) -o test
+all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o
+	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o $(LDFLAGS) -o test
+
+controller.o : src/controller.c src/controller.h
+	${CC} ${CFLAGS} ${INCLUDES} -c src/controller.c
 
 renderer.o : src/renderer.c src/renderer.h src/span.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/renderer.c

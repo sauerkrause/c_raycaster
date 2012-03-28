@@ -75,12 +75,13 @@ void compute_cam_dists(const vec2_t* hits, const size_t num_hits,
 
 void update_scene(void)
 {
-  vec2_rotate(& demo_state_get()->offset, 
-	      RATE_OF_CHANGE * 0.15 * time_elapsed(&span));
-  state.cam_pos = vec2_add(& demo_state_get()->pos, 
-			   & demo_state_get()->offset);
+/*   vec2_rotate(& demo_state_get()->offset,  */
+/* 	      RATE_OF_CHANGE * 0.15 * time_elapsed(&span)); */
+
+/*   state.cam_pos = vec2_add(& demo_state_get()->pos,  */
+/* 			   & demo_state_get()->offset); */
   time_update(&span);
-  vec2_rotate(&state.cam_dir, RATE_OF_CHANGE * time_elapsed(&span));
+/*   vec2_rotate(&state.cam_dir, RATE_OF_CHANGE * time_elapsed(&span)); */
 }
 
 uint32_t make_rgb(float r, float g, float b, SDL_PixelFormat* fmt)

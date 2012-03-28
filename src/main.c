@@ -1,5 +1,3 @@
-
-
 #include "SDL_dep.h"
 
 #include "vec2.h"
@@ -10,6 +8,7 @@
 #include "demo_state.h"
 #include "framebuffer.h"
 #include "renderer.h"
+#include "controller.h"
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
@@ -22,12 +21,11 @@
 #define MAIN main
 #endif
 
+
+void transform_map(map_t* map);
+
 void initialize_camera(void)
 {
-  demo_state_get()->pos.x = 39.5;
-  demo_state_get()->pos.y = 11.5;
-  demo_state_get()->offset.x = 10;
-  demo_state_get()->offset.y = 0.0;
   span.current = 0.0;
   time_update(&span);
   time_update(&span);
@@ -73,10 +71,15 @@ void handle_normal_keys(unsigned char key, int x, int y)
   }
 }
 
+int moving_forward = 0;
+
+controller_t* controller;
+
 void loop(int* quit)
 {
   /* Handle controls */
   SDL_Event event;
+
   while(SDL_PollEvent(&event)) {
     switch(event.type) {
     case SDL_QUIT:
@@ -85,14 +88,32 @@ void loop(int* quit)
     case SDL_KEYDOWN:
       switch(event.key.keysym.sym) {
       case SDLK_ESCAPE:
-      case 'q':
+      case SDLK_q:
 	*quit = true;
 	break;
+      default:
+	controller_button_went_down(controller, event.key.keysym.sym);
+	break;
       }
-	
+    case SDL_KEYUP:
+      controller_button_came_up(controller, event.key.keysym.sym);
+      break;	
     }
   }
-  /* Process game logic */
+  /* Process game logic */ 
+  if(controller_is_button_down(controller, 'w')) {
+    vec2_t velocity;
+    velocity = state.cam_dir;
+    vec2_t position = vec2_add(&state.cam_pos, &velocity);
+    state.cam_pos = position;
+  }
+  if(controller_is_button_down(controller, 's')) {
+    vec2_t velocity;
+    velocity = state.cam_dir;
+    vec2_scale(&velocity, -1.0);
+    vec2_t position = vec2_add(&state.cam_pos, &velocity);
+    state.cam_pos = position;
+  }
 
   /* Render view */
   renderer_render_scene();
@@ -103,6 +124,7 @@ int main(int argc, char** argv)
   int row, col;
   int quit;
   SDL_Surface * framebuffer;
+  controller = controller_new();
 
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
     fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
