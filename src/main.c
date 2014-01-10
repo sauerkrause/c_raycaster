@@ -21,6 +21,8 @@
 #define MAIN main
 #endif
 
+#define WALK_SPEED 5.0f
+#define TURN_ANGLE 2.0f
 
 void transform_map(map_t* map);
 
@@ -106,13 +108,23 @@ void loop(int* quit)
   if(controller_is_button_down(controller, SDLK_w)) {
     vec2_t velocity;
     velocity = state.cam_dir;
+    vec2_scale(&velocity, WALK_SPEED * (float)span.elapsed);
     state.cam_pos = vec2_add(&state.cam_pos, &velocity);
   }
   if(controller_is_button_down(controller, SDLK_s)) {
     vec2_t velocity;
     velocity = state.cam_dir;
     vec2_scale(&velocity, -1.0);
+    vec2_scale(&velocity, WALK_SPEED * (float)span.elapsed);
     state.cam_pos = vec2_add(&state.cam_pos, &velocity);
+  }
+  if(controller_is_button_down(controller, SDLK_d)) {
+    vec2_rotate(&state.cam_dir, TURN_ANGLE * (float)span.elapsed);
+    vec2_normalize(&state.cam_dir);
+  }
+  if(controller_is_button_down(controller, SDLK_a)) {
+    vec2_rotate(&state.cam_dir, -1.0f * TURN_ANGLE * (float)span.elapsed);
+    vec2_normalize(&state.cam_dir);
   }
 
   /* Render view */
@@ -130,7 +142,7 @@ int main(int argc, char** argv)
     fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
     exit(1);
   }
-  framebuffer = SDL_SetVideoMode(640,480,32,SDL_SWSURFACE);
+  framebuffer = SDL_SetVideoMode(320,240,32,SDL_SWSURFACE);
   
   if(framebuffer == 0) {
     fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
