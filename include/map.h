@@ -7,6 +7,10 @@
 
 typedef int map_t[MAX_X][MAX_Y];
 
+void map_init(const char *str);
+
+void map_generate(map_t* map);
+
 map_t* map_get(void);
 
 void map_print(map_t* map);

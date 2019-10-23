@@ -24,7 +24,7 @@
 #define WALK_SPEED 5.0f
 #define TURN_ANGLE 2.0f
 
-void transform_map(map_t* map);
+const char* map_file = "map.ss";
 
 void initialize_camera(void)
 {
@@ -36,33 +36,6 @@ void initialize_camera(void)
   state.cam_dir.x = -1.0;
   state.cam_dir.y = 0.0;
 }
-
-void initialize_map(void)
-{
-  FILE * out; 
-  out = fopen("map.ss", "r");
-  if(!out) {
-    transform_map(map_get());
-    out = fopen("map.ss", "w");
-    map_serialize(map_get(), out, 1);
-  } else {
-    map_serialize(map_get(), out, 0);
-  }
-  fclose(out);
-}
-
-void transform_map(map_t* map)
-{
-  int i, j;
-  for(i = 1; i < MAX_X - 1; ++i)
-    for(j = 1; j < MAX_Y - 1; ++j) {
-      int data = (float)rand() / RAND_MAX <= 0.05;
-      /* int data = i == 2 && j == 4; */
-      (*map)[i][j] = data;
-      
-    }
-}
-
 
 void handle_normal_keys(unsigned char key, int x, int y)
 {
@@ -154,7 +127,7 @@ int main(int argc, char** argv)
 
   initscr();
   initialize_camera();
-  initialize_map();
+  map_init(map_file);
 
   /* map_print(map_get()); */
   quit = 0;
