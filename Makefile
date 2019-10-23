@@ -5,10 +5,10 @@ CFLAGS=-ansi -Wall -pedantic -O0 -g
 COMMON_LDFLAGS = -lm -lncurses
 
 ifeq "$(OSTYPE)" "darwin11"
-	LDFLAGS = $(COMMON_LDFLAGS) -framework Cocoa -framework OpenGL -framework GLUT -framework SDL -framework SDL_image -lSDLmain
+	LDFLAGS = $(COMMON_LDFLAGS) -framework Cocoa -framework SDL -framework SDL_image -lSDLmain
 	SDL_INCLUDES = -I/Library/Frameworks/SDL.framework/Headers/ -I/Library/Frameworks/SDL_image.framework/Headers/
 else
-	LDFLAGS = $(COMMON_LDFLAGS) -lGL -lglut -lGLU -lSDL -lSDL_image
+	LDFLAGS = $(COMMON_LDFLAGS) -lSDL -lSDL_image
 	SDL_INCLUDES = 
 endif
 

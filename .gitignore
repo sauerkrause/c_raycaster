@@ -1,5 +1,5 @@
 # Emacs autosaves #
 *~
-
+*.o
 # output of the make all #
 test

@@ -1,5 +1,4 @@
 #include "framebuffer.h"
-#include "opengl_dep.h"
 #include <stdlib.h>
 #include <memory.h>
 #include "SDL_dep.h"
