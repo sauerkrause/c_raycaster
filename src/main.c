@@ -133,7 +133,6 @@ void loop(int* quit)
 
 int main(int argc, char** argv)
 {
-  int row, col;
   int quit;
   SDL_Surface * framebuffer;
   controller = controller_new();
@@ -152,14 +151,8 @@ int main(int argc, char** argv)
   framebuffer_set(framebuffer);
   
   atexit(SDL_Quit);
-  row=80;
-  col=24;
 
   initscr();
-  getmaxyx(stdscr, col, row);
-  row = framebuffer->w;
-  col = framebuffer->h;
-
   initialize_camera();
   initialize_map();
 
