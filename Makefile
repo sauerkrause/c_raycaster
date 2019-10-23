@@ -12,45 +12,45 @@ else
 	SDL_INCLUDES = 
 endif
 
-INCLUDES = $(SDL_INCLUDES)
+INCLUDES = $(SDL_INCLUDES) -Iinclude/
 
 all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o
 	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o $(LDFLAGS) -o test
 
-controller.o : src/controller.c src/controller.h
+controller.o : src/controller.c include/controller.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/controller.c
 
-renderer.o : src/renderer.c src/renderer.h src/span.h
+renderer.o : src/renderer.c include/span.h include/renderer.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/renderer.c
 
-vec2.o : src/vec2.c src/vec2.h
+vec2.o : src/vec2.c include/vec2.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/vec2.c
 
-main.o : src/main.c src/span.h
+main.o : src/main.c include/span.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/main.c
 
-map.o : src/map.c src/map.h
+map.o : src/map.c include/map.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/map.c
 
-raycaster.o : src/raycaster.c src/raycaster.h
+raycaster.o : src/raycaster.c include/raycaster.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/raycaster.c
 
-time.o : src/time.h src/time.c
+time.o : include/time.h src/time.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/time.c
 
-demo_state.o : src/demo_state.h src/demo_state.c
+demo_state.o : include/demo_state.h src/demo_state.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/demo_state.c
 
-framebuffer.o : src/framebuffer.h src/framebuffer.c
+framebuffer.o : include/framebuffer.h src/framebuffer.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/framebuffer.c
 
-enemy_director.o : src/enemy_director.h src/enemy_director.c
+enemy_director.o : include/enemy_director.h src/enemy_director.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/enemy_director.c
 
-xorshift.o : src/xorshift.h src/xorshift.c
+xorshift.o : include/xorshift.h src/xorshift.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/xorshift.c
 
-texture.o : src/texture.h src/texture.c
+texture.o : include/texture.h src/texture.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/texture.c
 
 clean :
