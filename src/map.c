@@ -22,7 +22,7 @@ void map_generate(map_t* map)
   int i, j;
   for(i = 1; i < MAX_X - 1; ++i)
     for(j = 1; j < MAX_Y - 1; ++j) {
-      int data = (float)rand() / RAND_MAX <= 0.05;
+      int data = (float)rand() / (float)RAND_MAX <= 0.05;
       /* int data = i == 2 && j == 4; */
       (*map)[i][j] = data; 
     }

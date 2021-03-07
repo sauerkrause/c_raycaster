@@ -24,7 +24,7 @@ texture_t* texture_load(const char * filename, const char * name)
 {
   static uint8_t num_textures = 0;
   SDL_Surface* surface;
-  uint8_t return_offset;
+  uint8_t return_offset = 0;
 
   surface = 0;
   surface = IMG_Load(filename);
