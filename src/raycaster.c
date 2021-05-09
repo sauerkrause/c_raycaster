@@ -28,20 +28,15 @@ typedef struct rct_info
 
 static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam)
 {
-  vec2_t* neg_cam;
-  vec2_t* heading;
+  vec2_t neg_cam;
+  vec2_t heading;
   vec2_type dot;
   
-  neg_cam = malloc(sizeof(vec2_t));
-  heading = malloc(sizeof(vec2_t));
+  neg_cam = vec2_negate(cam);
+  heading = vec2_add(test, &neg_cam);
 
-  *neg_cam = vec2_negate(cam);
-  *heading = vec2_add(test, neg_cam);
+  dot = vec2_dot(&heading, &heading);
 
-  dot = vec2_dot(heading, heading);
-
-  free(neg_cam);
-  free(heading);
   return pow(dot, 2.0);
 }
 
@@ -79,61 +74,49 @@ void raycaster_cast_rays(const vec2_t* origin,
 int raycaster_cast(const vec2_t* origin, const vec2_t* ray,
 		   vec2_t* intersection)
 {
-  vec2_t* intersection_x;
-  vec2_t* intersection_y;
+  vec2_t intersection_x;
+  vec2_t intersection_y;
   vec2_type dist_x, dist_y;
   int ret_val;
+  int cast_x, cast_y;
 
   ret_val = 0;
-  intersection_x = malloc(sizeof(vec2_t));
-  intersection_y = malloc(sizeof(vec2_t));
   dist_x = -1.0;
   dist_y = -1.0;
-  if(!raycaster_cast_xplanes(origin, ray, intersection_x)) {
-    free(intersection_x);
-    intersection_x = 0;
-  }
-  if(!raycaster_cast_yplanes(origin, ray, intersection_y)) {
-    free(intersection_y);
-    intersection_y = 0;
-  }
+  cast_x = raycaster_cast_xplanes(origin, ray, &intersection_x);
+  cast_y = raycaster_cast_yplanes(origin, ray, &intersection_y);
 
-  if(intersection_y)
-    dist_y = vec2_dist_from_cam_2(intersection_y, origin);
-  if(intersection_x)
-    dist_x = vec2_dist_from_cam_2(intersection_x, origin);
+  if(cast_y)
+    dist_y = vec2_dist_from_cam_2(&intersection_y, origin);
+  if(cast_x)
+    dist_x = vec2_dist_from_cam_2(&intersection_x, origin);
 
   if(dist_x < 0.0 && dist_y < 0.0) {
     ret_val = 0;
     goto raycaster_cleanup_cast_rays;
   }
   if(dist_x < 0.0) {
-    memcpy(intersection, intersection_y, sizeof(vec2_t));
+    intersection[0] = intersection_y;
     ret_val = 1;
     goto raycaster_cleanup_cast_rays;
   }
   if(dist_y < 0.0) {
-    memcpy(intersection, intersection_x, sizeof(vec2_t));
+    intersection[0] = intersection_x;
     ret_val = 1;
     goto raycaster_cleanup_cast_rays;
   }
 
   if(MIN(dist_x, dist_y) == dist_x) {
-    memcpy(intersection, intersection_x, sizeof(vec2_t));
+    intersection[0] = intersection_x;
     ret_val = 1;
     goto raycaster_cleanup_cast_rays;
   } else {
-    memcpy(intersection, intersection_y, sizeof(vec2_t));
+    intersection[0] = intersection_y;
     ret_val = 1;
     goto raycaster_cleanup_cast_rays;
   }
 
  raycaster_cleanup_cast_rays:
-  if(intersection_y)
-    free(intersection_y);
-  if(intersection_x)
-    free(intersection_x);
-  intersection_x = intersection_y = 0;
 
   return ret_val;
 }
