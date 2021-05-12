@@ -14,14 +14,6 @@ int texture_cmp_name(const void * a, const void * b)
   return strcmp(name_a->name, name_b->name);
 }
 
-void texture_init(const char* texture_conf)
-{
-  /* TODO */
-  /* for texture file in directory */
-    /* get basename from filename*/
-    /* add filename and basename to list */
-}
-
 texture_list_t texture_list()
 {
   static texture_list_t list_textures = NULL;
@@ -89,4 +81,16 @@ static void texture_name_add(const char* name, uint8_t id)
   list->names[list->size].name = name;
   list->names[list->size++].id = id;
   qsort(list, list->size, sizeof(texture_name_t), &texture_cmp_name);
+}
+
+void texture_init(const char* texture_conf)
+{
+  char line[1024];
+  char name[256];
+  char filename[768];
+  FILE* file = fopen(texture_conf, "r");
+  while(fgets(line, 1024, file)) {
+    sscanf(line, "%s=%s", name, filename);
+    texture_load(filename, name);
+  }
 }
