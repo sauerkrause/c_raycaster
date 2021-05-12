@@ -24,6 +24,9 @@
 #define WALK_SPEED 5.0f
 #define TURN_ANGLE 2.0f
 
+#define HRES 1280
+#define VRES 720
+
 const char* map_file = "map.ss";
 
 void initialize_camera(void)
@@ -114,10 +117,10 @@ int main(int argc, char** argv)
     fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
     exit(1);
   }
-  framebuffer = SDL_SetVideoMode(320,240,32,SDL_SWSURFACE);
+  framebuffer = SDL_SetVideoMode(HRES,VRES,32,SDL_SWSURFACE);
   
   if(framebuffer == 0) {
-    fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
+    fprintf(stderr, "Unable to set %dx%d video: %s\n", HRES, VRES, SDL_GetError());
     exit(1);
   }
 
