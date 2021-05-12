@@ -24,6 +24,7 @@
 #define INDEX_XY(x,y) \
   (x * height + y)
 
+
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
 void raycast_scene(vec2_t* hits, const size_t num_hits);
 void update_scene(void);
@@ -33,6 +34,8 @@ void handle_normal_keys(unsigned char key, int x, int y);
 
 void initialize_map(void);
 void initialize_camera(void);
+
+static double g_FPS_MIN = 10000000.0;
 
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov)
 {
@@ -51,7 +54,7 @@ void raycast_scene(vec2_t* hits, const size_t num_hits)
   height = framebuffer_get()->h;
 
   theta = calculate_fov(width, height, VFOV);
-  raycaster_cast_rays(&state.cam_pos, &state.cam_dir, &theta, 
+  raycaster_cast_rays(&state.cam_pos, &state.cam_dir, theta,
 		      hits, num_hits);
 }
 
@@ -110,6 +113,7 @@ void renderer_render_scene(void) {
   int width, height;
   unsigned short x;
   char string[128];
+  char min_string[128];
   uint32_t* pixel_buffer;
   SDL_Surface* framebuffer;
 
@@ -118,7 +122,9 @@ void renderer_render_scene(void) {
 
   update_scene();
   fps = 1.0 / time_elapsed(&span);
+  g_FPS_MIN = (fps > g_FPS_MIN) ? g_FPS_MIN : fps;
   sprintf(string, "FPS: %5.1f", fps);
+  sprintf(min_string, "Min FPS: %5.1f", g_FPS_MIN);
 
   width = framebuffer->w;
   height = framebuffer->h;
@@ -146,6 +152,7 @@ void renderer_render_scene(void) {
     }
   }
   mvaddstr(0,0,string);
+  mvaddstr(1,0,min_string);
 
   refresh();
   free(dists);

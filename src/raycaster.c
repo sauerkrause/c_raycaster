@@ -20,7 +20,7 @@ typedef struct rct_info
 {
   const vec2_t* origin;
   const vec2_t* ray;
-  const vec2_type* fov;
+  vec2_type fov;
   size_t count;
   vec2_t* intersections;
   int id;
@@ -43,7 +43,7 @@ static vec2_type vec2_dist_from_cam_2(const vec2_t* test, const vec2_t* cam)
 
 void raycaster_cast_rays(const vec2_t* origin,
 			 const vec2_t* ray,
-			 const vec2_type* fov,
+			 vec2_type fov,
 			 vec2_t* intersections,
 			 size_t count)
 {
@@ -51,9 +51,9 @@ void raycaster_cast_rays(const vec2_t* origin,
   vec2_t bad_ray;
   int upper_ind, counter;
 
-  upper_bound = *fov * 0.5;
+  upper_bound = fov * 0.5;
   lower_bound = -upper_bound;
-  d_theta = *fov / (vec2_type)count;
+  d_theta = fov / (vec2_type)count;
   
   bad_ray.x = -1.0;
   bad_ray.y = -1.0;
