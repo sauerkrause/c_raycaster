@@ -3,7 +3,7 @@
 #include <string.h>
 
 static void texture_name_add(const char* name, uint8_t id);
-static int8_t texture_name_locate(const char* name, uint8_t* id);
+static uint8_t texture_name_locate(const char* name, uint8_t* id);
 
 int texture_cmp_name(const void* a, const void* b);
 
@@ -14,9 +14,20 @@ int texture_cmp_name(const void * a, const void * b)
   return strcmp(name_a->name, name_b->name);
 }
 
+void texture_init(const char* texture_conf)
+{
+  /* TODO */
+  /* for texture file in directory */
+    /* get basename from filename*/
+    /* add filename and basename to list */
+}
+
 texture_list_t texture_list()
 {
-  static texture_list_t list_textures;
+  static texture_list_t list_textures = NULL;
+  if(!list_textures) {
+    list_textures = malloc(sizeof(texture_t) * MAX_TEXTURES);
+  }
   return list_textures;
 }
 
@@ -54,10 +65,11 @@ static texture_name_list_t* texture_name_list_get()
   return &name_list;
 }
 
-static int8_t texture_name_locate(const char* name, uint8_t* id)
+static uint8_t texture_name_locate(const char* name, uint8_t* id)
 {
   texture_name_t* element;
   texture_name_list_t* list;
+
   list = texture_name_list_get();
   element = bsearch(name, list->names, list->size, sizeof(texture_name_t), &texture_cmp_name);
 
@@ -71,7 +83,8 @@ static int8_t texture_name_locate(const char* name, uint8_t* id)
 
 static void texture_name_add(const char* name, uint8_t id)
 {
-  texture_name_list_t* list;
+  texture_name_list_t* list = 0;
+
   list = texture_name_list_get();
   list->names[list->size].name = name;
   list->names[list->size++].id = id;

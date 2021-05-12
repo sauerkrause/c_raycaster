@@ -9,6 +9,7 @@
 #include "framebuffer.h"
 #include "renderer.h"
 #include "controller.h"
+#include "texture.h"
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
@@ -28,6 +29,7 @@
 #define VRES 720
 
 const char* map_file = "map.ss";
+const char* texture_config = "textures/texture.conf";
 
 void initialize_camera(void)
 {
@@ -131,6 +133,7 @@ int main(int argc, char** argv)
   initscr();
   initialize_camera();
   map_init(map_file);
+  texture_init(texture_config);
 
   /* map_print(map_get()); */
   quit = 0;
