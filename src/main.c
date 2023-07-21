@@ -13,7 +13,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <ncurses.h>
-#include "span.h"
 
 #ifdef __APPLE__
 #define MAIN SDL_Main
@@ -28,6 +27,8 @@
 #define VRES 720
 
 const char* map_file = "map.ss";
+extern game_state state;
+extern timespan span;
 
 void initialize_camera(void)
 {

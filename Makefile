@@ -14,23 +14,26 @@ endif
 
 INCLUDES = $(SDL_INCLUDES) -Iinclude/
 
-all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o
-	${CC} main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o $(LDFLAGS) -o test
+all : main.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o game.o span.o
+	${CC} main.o game.o span.o vec2.o map.o raycaster.o time.o framebuffer.o enemy_director.o demo_state.o xorshift.o texture.o renderer.o controller.o $(LDFLAGS) -o test
 
 controller.o : src/controller.c include/controller.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/controller.c
 
-renderer.o : src/renderer.c include/span.h include/renderer.h
+renderer.o : src/renderer.c include/renderer.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/renderer.c
 
 vec2.o : src/vec2.c include/vec2.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/vec2.c
 
-main.o : src/main.c include/span.h
+main.o : src/main.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/main.c
 
 map.o : src/map.c include/map.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/map.c
+
+game.o : src/game.c include/game.h
+	${CC} ${CFLAGS} ${INCLUDES} -c src/game.c
 
 raycaster.o : src/raycaster.c include/raycaster.h
 	${CC} ${CFLAGS} ${INCLUDES} -c src/raycaster.c
@@ -52,6 +55,9 @@ xorshift.o : include/xorshift.h src/xorshift.c
 
 texture.o : include/texture.h src/texture.c
 	${CC} ${CFLAGS} ${INCLUDES} -c src/texture.c
+
+span.o : src/span.c
+	${CC} ${CFLAGS} ${INCLUDES} -c src/span.c
 
 clean :
 	rm ./*.o

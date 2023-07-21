@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
-#include "span.h"
 
 #define FULLSCREEN 1
 
@@ -24,6 +23,8 @@
 #define INDEX_XY(x,y) \
   (x * height + y)
 
+extern timespan span;
+extern game_state state;
 
 vec2_type calculate_fov(vec2_type xres, vec2_type yres, vec2_type vfov);
 void raycast_scene(vec2_t* hits, const size_t num_hits);
